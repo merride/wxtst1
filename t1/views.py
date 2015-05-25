@@ -7,6 +7,8 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
+from boto.connection import HTTPResponse
+from django.http.response import HttpResponse
 
 @csrf_exempt
 
@@ -65,3 +67,16 @@ Class wxinterface(View)：
         fromUserName=xml.find('FromUserName').text
         toUserName=xml.find('ToUserName').text
         createTime=xml.find('CreateTime').text
+        reply='''
+               <xml>
+               <ToUserName>%s</ToUserName>
+               <FromUserName>%s</FromUserName>
+               <CreateTime>%s</CreateTime>
+               <MsgType>%s</MsgType>
+               <Content>%s</Content>
+               </xml>'''%(fromUserName,toUserName,str(int(time.time())),msgType,content)
+        return HttpResponse(reply,content_type="application/xml")
+    @csrf_exempt
+    def dispatch(self,*args,**kwargs):
+        return super(wxinterface,self).dispatch(*args,**kwargs)
+               
