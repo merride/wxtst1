@@ -1,13 +1,12 @@
 from django.shortcuts import render
 
 # Create your views here.
-
+from django.views.generic.base import View
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
-from boto.connection import HTTPResponse
 from django.http.response import HttpResponse
 
 @csrf_exempt
@@ -23,6 +22,7 @@ def checkSignature(request):
     tmplist.sort()
     tmpstr="%s%s%s"%tuple(tmplist)
     tmpstr=hashlib.sha1(tmpstr).hexdigest()
+    
     if tmpstr==signature:
         return echostr
     else:
@@ -56,9 +56,23 @@ def index(request):
     return getReplyXml(msg,replyContent)  
 """
 
-Class wxinterface(View)：
+
+class wxinterface(View):
     def __init__(self):
-        self.TOKEN='merride'
+        self.TOKEN='merride' 
+        
+    def get(self,request,*args,**kwargs):
+        signature=request.GET.get('signature')
+        timestamp=request.GET.get('timestamp')
+        nonce=request.GET.get('nonce')
+        echostr=request.GET.get('echostr')
+        alist=[self.TOKEN,timestamp,nonce]
+        alist.sort()
+        sha1=hashlib.sha1()
+        map(sha1.update,alist)
+        if signature==sha1.hexdigest():
+            return HttpResponse(echostr)
+      
     def post(self,request,*args,**kwargs):
         xml_str=request.body
         xml=ET.fromstring(xml_str)
@@ -76,7 +90,6 @@ Class wxinterface(View)：
                <Content>%s</Content>
                </xml>'''%(fromUserName,toUserName,str(int(time.time())),msgType,content)
         return HttpResponse(reply,content_type="application/xml")
-    @csrf_exempt
     def dispatch(self,*args,**kwargs):
         return super(wxinterface,self).dispatch(*args,**kwargs)
                
