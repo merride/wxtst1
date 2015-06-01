@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 import hashlib
 from django.http.response import HttpResponse
 
-@csrf_exempt
+
 
 
 def checkSignature(request):
@@ -81,6 +81,14 @@ class wxinterface(View):
         fromUserName=xml.find('FromUserName').text
         toUserName=xml.find('ToUserName').text
         createTime=xml.find('CreateTime').text
+        reply1="""<xml>
+               <ToUserName>username</ToUserName>
+               <FromUserName>from user name</FromUserName>
+               <CreateTime>6.1</CreateTime>
+               <MsgType>text</MsgType>
+               <Content>2015</Content>
+               </xml>
+        """
         reply='''
                <xml>
                <ToUserName>%s</ToUserName>
@@ -89,7 +97,9 @@ class wxinterface(View):
                <MsgType>%s</MsgType>
                <Content>%s</Content>
                </xml>'''%(fromUserName,toUserName,str(int(time.time())),msgType,content)
-        return HttpResponse(reply,content_type="application/xml")
+        #return HttpResponse(reply,content_type="application/xml")
+        return HttpResponse(reply1,content_type="application/xml")
+    @csrf_exempt
     def dispatch(self,*args,**kwargs):
         return super(wxinterface,self).dispatch(*args,**kwargs)
                
